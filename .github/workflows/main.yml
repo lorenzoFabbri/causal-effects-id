@@ -12,22 +12,25 @@ jobs:
         with:
           root_file: main.tex
 
-      - name: List directory contents
+      - name: List directory contents (before checkout)
         run: ls -R
+        shell: bash
+
+      - name: Move PDF to temporary location
+        run: mv main.pdf /tmp/main.pdf
         shell: bash
 
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
         with:
           ref: gh-pages
-          token: ${{ secrets.GH_PAT }}  # Use your PAT here
+          token: ${{ secrets.GH_PAT }}
 
-      - name: Move generated PDF to root (if needed)
-        run: |
-          echo "No action needed"
+      - name: Move PDF back from temporary location
+        run: mv /tmp/main.pdf ./main.pdf
         shell: bash
 
-      - name: List directory contents again
+      - name: List directory contents (after checkout)
         run: ls -R
         shell: bash
 
