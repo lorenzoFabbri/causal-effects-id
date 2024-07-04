@@ -12,6 +12,8 @@ jobs:
           root_file: main.tex
       - name: Upload PDF file
         run: |
+          git config --global user.name "lorenzoFabbri"
+          git config --global user.email "lorenzoFabbri@users.noreply.github.com"
           git add main.pdf
           git commit -m "Uploading PDF to Pages."
           git push origin gh-pages
