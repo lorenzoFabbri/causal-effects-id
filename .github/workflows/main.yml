@@ -12,16 +12,20 @@ jobs:
         with:
           root_file: main.tex
 
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload PDF file to Pages
+      - name: Move to gh-pages branch
         run: |
           git config --global user.name "lorenzoFabbri"
           git config --global user.email "lorenzoFabbri@users.noreply.github.com"
+          git fetch origin
+          git checkout -B gh-pages origin/gh-pages
+
+      - name: Move generated PDF to root
+        run: mv main.pdf main.pdf
+
+      - name: Commit and push PDF to gh-pages
+        run: |
           git add main.pdf
-          git commit -m "Uploading PDF to Pages."
-          git push origin gh-pages
+          git commit -m "Update PDF"
+          git push origin gh-pages --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
