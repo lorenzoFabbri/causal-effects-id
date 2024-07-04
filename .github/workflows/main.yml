@@ -11,7 +11,7 @@ jobs:
         with:
           root_file: main.tex
       - name: Upload PDF file
-        uses: actions/upload-artifact@v4
-        with:
-          name: PDF
-          path: main.pdf
+        run: |
+          git add main.pdf
+          git commit -m "Uploading PDF to Pages."
+          git push origin gh-pages
