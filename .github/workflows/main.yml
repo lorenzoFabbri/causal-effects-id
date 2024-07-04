@@ -12,13 +12,15 @@ jobs:
         with:
           root_file: main.tex
 
-      - name: List directory contents (before checkout)
+      - name: List directory contents (before upload)
         run: ls -R
         shell: bash
 
-      - name: Move PDF to temporary location
-        run: mv main.pdf /tmp/main.pdf
-        shell: bash
+      - name: Upload PDF as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: main-pdf
+          path: main.pdf
 
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
@@ -26,11 +28,13 @@ jobs:
           ref: gh-pages
           token: ${{ secrets.GH_PAT }}
 
-      - name: Move PDF back from temporary location
-        run: mv /tmp/main.pdf ./main.pdf
-        shell: bash
+      - name: Download PDF artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: main-pdf
+          path: .
 
-      - name: List directory contents (after checkout)
+      - name: List directory contents (after download)
         run: ls -R
         shell: bash
 
