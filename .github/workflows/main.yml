@@ -26,20 +26,17 @@ jobs:
     permissions:
       pages: write
       id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           token: ${{ secrets.GH_PAT }}
-      - name: Download PDF artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: main-pdf
-          path: .
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
         with:
           token: ${{ secrets.GH_PAT }}
-          branch: gh-pages
-          folder: .
+          artifact_name: main.pdf
