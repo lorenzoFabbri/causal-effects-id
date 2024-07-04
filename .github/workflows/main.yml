@@ -19,3 +19,5 @@ jobs:
           git add main.pdf
           git commit -m "Uploading PDF to Pages."
           git push origin gh-pages
+        with:
+          github_token: ${{ secrets.DEPENDABOT_TOKEN }}
