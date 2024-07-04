@@ -1,10 +1,18 @@
 name: Build and Deploy LaTeX document
-on: [push]
+
+on:
+  push:
+    branches:
+      - main  # Replace 'main' with the branch you use
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Ensure the job has write permissions
+
     steps:
-      - name: Set up Git repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Compile LaTeX document
@@ -14,7 +22,6 @@ jobs:
 
       - name: List directory contents (before upload)
         run: ls -R
-        shell: bash
 
       - name: Upload PDF as artifact
         uses: actions/upload-artifact@v3
@@ -22,6 +29,14 @@ jobs:
           name: main-pdf
           path: main.pdf
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_and_deploy  # Ensure this job runs after the build_and_deploy job
+    permissions:
+      pages: write  # Ensure the job has write permissions for pages
+      id-token: write  # Enable OIDC token permissions
+
+    steps:
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
         with:
@@ -36,10 +51,10 @@ jobs:
 
       - name: List directory contents (after download)
         run: ls -R
-        shell: bash
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: actions/deploy-pages@v1
         with:
-          github_token: ${{ secrets.GH_PAT }}
-          publish_dir: .  # Current directory containing main.pdf
+          token: ${{ secrets.GH_PAT }}
+          branch: gh-pages  # Deploy to gh-pages branch
+          folder: .  # Deploy from the root directory
