@@ -16,7 +16,7 @@ jobs:
         with:
           root_file: main.tex
       - name: Upload PDF as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-pages-artifact@v3.0.1
         with:
           name: main-pdf
           path: main.pdf
@@ -30,11 +30,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          token: ${{ secrets.GH_PAT }}
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
         with:
