@@ -1,4 +1,4 @@
-name: Build LaTeX document
+name: Build and Deploy LaTeX document
 on: [push]
 jobs:
   build_and_deploy:
@@ -47,3 +47,9 @@ jobs:
           git push origin gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GH_PAT }}
+          publish_dir: ./  # Directory where main.pdf is located
