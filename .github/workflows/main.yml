@@ -10,6 +10,9 @@ jobs:
         uses: xu-cheng/latex-action@v3
         with:
           root_file: main.tex
+      - uses: actions/checkout@v3
+        with:
+          github_token: ${{ secrets.DEPENDABOT_TOKEN }}
       - name: Upload PDF file to Pages
         run: |
           git fetch origin gh-pages
@@ -19,5 +22,3 @@ jobs:
           git add main.pdf
           git commit -m "Uploading PDF to Pages."
           git push origin gh-pages
-        with:
-          github_token: ${{ secrets.DEPENDABOT_TOKEN }}
