@@ -1,7 +1,7 @@
 name: Build LaTeX document
 on: [push]
 jobs:
-  build_latex:
+  build_and_deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Git repository
@@ -12,16 +12,29 @@ jobs:
         with:
           root_file: main.tex
 
+      - name: List directory contents
+        run: ls -R
+        shell: bash
+
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
         with:
           ref: gh-pages
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GH_PAT }}  # Use your PAT here
+
+      - name: Move generated PDF to root (if needed)
+        run: |
+          echo "No action needed"
+        shell: bash
+
+      - name: List directory contents again
+        run: ls -R
+        shell: bash
 
       - name: Commit and push PDF to gh-pages
         run: |
-          git config --global user.name "lorenzoFabbri"
-          git config --global user.email "lorenzoFabbri@users.noreply.github.com"
+          git config --global user.name "Your Name"
+          git config --global user.email "your.email@example.com"
           git add main.pdf
           git commit -m "Update PDF"
           git push origin gh-pages
