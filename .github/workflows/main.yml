@@ -9,14 +9,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Compile LaTeX document
-        uses: xu-cheng/latex-action@v3
+      - uses: actions/checkout@v4.1.7
+      - uses: xu-cheng/latex-action@v3.2.0
         with:
           root_file: main.tex
-      - name: Upload PDF as artifact
-        uses: actions/upload-pages-artifact@v3.0.1
+      - uses: actions/upload-artifact@v4.3.3
         with:
           name: main-pdf
           path: main.pdf
@@ -30,8 +27,15 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+      - uses: actions/download-artifact@v4.1.7
+        with:
+          name: main-pdf
+          path: .
+      - uses: actions/configure-pages@v5.0.0
+      - uses: actions/upload-pages-artifact@v3.0.1
+        with:
+          path: .
+      - uses: actions/deploy-pages@v4.0.5
         with:
           token: ${{ secrets.GH_PAT }}
           artifact_name: main.pdf
