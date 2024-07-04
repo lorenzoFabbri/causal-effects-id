@@ -19,9 +19,6 @@ jobs:
           git fetch origin
           git checkout -B gh-pages origin/gh-pages
 
-      - name: Move generated PDF to root
-        run: mv main.pdf main.pdf
-
       - name: Commit and push PDF to gh-pages
         run: |
           git add main.pdf
