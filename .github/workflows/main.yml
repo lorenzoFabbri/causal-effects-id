@@ -12,7 +12,7 @@ jobs:
           root_file: main.tex
       - uses: actions/checkout@v3
         with:
-          token: ${{ secrets.DEPENDABOT_TOKEN }}
+          github_token: ${{ secrets.DEPENDABOT_TOKEN }}
       - name: Upload PDF file to Pages
         run: |
           git config --global user.name "lorenzoFabbri"
