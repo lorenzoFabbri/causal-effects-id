@@ -7,6 +7,15 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 
+\usepackage{glossaries}
+\makeglossaries
+\newglossaryentry{IPTW}{
+    name=IPTW,
+    description={
+        Inverse Probability of Treatment Weighting
+    }
+}
+
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhead{}
@@ -40,15 +49,22 @@
 \maketitle
 \tableofcontents
 
-\section{Resources}
+\clearpage
+\printglossaries
+\clearpage
 
+\section{Resources}
 \begin{itemize}
-    \item Formulas for when there are more than two time points.
-    \item G-computation, IPTW, and EIF-based estimators, including for multiple interventions.
+    \item G-computation, IPTW, and EIF-based estimators for when:
+    \begin{itemize}
+        \item There are more than two time points.
+        \item There is more than one exposure.
+        \item The exposures are continuous (IPTW).
+    \end{itemize}
     \item Do the terms $f(a|l)$ go away because we are setting the exposure $A$ to $a$, or are they incorporated with $f(l)$ into $f(a,l)$? If they are removed, where does the summation over $a$ come from for natural-value based interventions?
     \item What is the difference between $a^*$, $a$, and $a^{+g}$?
-    \item E-mail Jessica SWIG; document fast food; GitHub discussion; StackExchange posts.
     \item $E[Y^g|l,a^{+g}]f(a^{+g}|a)$: what if $A$ is continuous? Just multiply?
+    \item Document FF; GitHub discussion; Stack-Exchange posts.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -121,6 +137,23 @@ One estimator of $\mathbb{E}^G [Y]$ is called \textbf{parametric g-computation f
 \end{enumerate}
 
 In the case of multiple exposures (e.g., if $A$ is actually a vector of variables), the g-formula would remain the same \footnote{We are assuming that there would be \textbf{no arrow} between exposure nodes in the SWIG, that is: $f(a_1,a_2|l) = f(a_1|l) \times f(a_2|l)$. This means that the correlation between them is due to e.g., a common source, but the exposures themselves are not causally related.}, but the pseudo-algorithm should be modified to take into account that the intervention rule now applies to all exposures $a \in \mathbf{A}$.
+
+A second estimator of $\mathbb{E}^G [Y]$ is based on modeling the exposure mechanism, rather than the outcome, and it is referred to as \textbf{inverse probability of treatment weighting} (\Gls{IPTW}) estimator. This can be derived nothing that the g-formula for $\mathbb{E}^G [Y]$ can be rewritten as follows:
+
+\begin{align}
+    \mathbb{E}^G \left[ Y \right] &= \sum_y \sum_l y f(y|l,\textcolor{red}{a}) f(l) \\
+    &= \sum_y \sum_l y f(y,\textcolor{red}{a}|l) \frac{f(l)}{f(\textcolor{red}{a}|l)} \\
+    &= \sum_l \mathbb{E} \left[ \frac{YA}{f(A|L)} | L \right] f(l) \\
+    &= \mathbb{E} \left[ \frac{YA}{f(A|L)} \right].
+\end{align}
+
+The pseudo-algorithm for a binary exposure $A$ reads as follows (for simplicity, we do not consider the censoring mechanism $C$ here):
+
+\begin{enumerate}
+    \item Fit a model with dependent variable $A$ and independent variables $L$.
+    \item Denoting the predictions from this model as $p_a$, estimate the weights $w_a = \frac{1}{A \times p_a + (1-A) \times (1 - p_a)}$.
+    \item Take the average of $w_a \times Y$ over the confounders L.
+\end{enumerate}
 
 \subsubsection{Deterministic Dynamic Treatment Regimes}
 The rule for assigning treatment depends on past treatment or covariates.
@@ -227,8 +260,25 @@ Thus, the expected value of the outcome $Y$ is:
     \mathbb{E}^G \left[ Y \right] &= \sum_y y f^G(y) \\
     &= \sum_y y \sum_l \sum_a \sum_{a^g} f^G(y,l,a,\textcolor{red}{a^g}) \\
     &= \sum_y \sum_l \sum_a \sum_{a^g} y f(y|l,\textcolor{red}{a^g}) f(\textcolor{red}{a^g}|l,a) f(a|l) f(l) \\
-    &= \sum_l \sum_a \sum_{a^g} \mathbb{E} \left[ Y|A=\textcolor{red}{a^g},L=l\right] f(\textcolor{red}{a^g}|a,L=l) f(a|l) f(L=l).
+    &= \sum_l \sum_a \sum_{a^g} \mathbb{E} \left[ Y|A=\textcolor{red}{a^g},L=l\right] f(\textcolor{red}{a^g}|a,L=l) f(a|l) f(L=l). \label{eq:gcomp_nat}
 \end{align}
+
+\paragraph*{Algorithms}
+One estimator of $\mathbb{E}^G [Y]$ is the \textbf{parametric g-computation formula}. For the simple case of a deterministic intervention that depends on the natural value of a single exposure and a single time point, it suffices to notice that Equation \ref{eq:gcomp_nat} is equivalent to:
+
+\begin{align}
+    \mathbb{E}^G \left[ Y \right] &= \sum_l \sum_a \sum_{a^g} \mathbb{E} \left[ Y|A=\textcolor{red}{a^g},L=l\right] f(\textcolor{red}{a^g},a,l).
+\end{align}
+
+The pseudo-algorithm then reads as follows:
+
+\begin{enumerate}
+    \item Fit a regression model with dependent variable $Y$ and independent variables $A$ and $L$.
+    \item Estimate the outcome $Y^a$ using the model fit in the previous point but changing the exposure according to the intervention rule $G$.
+    \item Take the average of $\hat{Y}^a$ over the confounders $L$.
+\end{enumerate}
+
+In the case of multiple exposures (e.g., if $A$ is actually a vector of variables), the g-formula would remain the same \footnote{Again, we are assuming that there would be \textbf{no arrow} between exposure nodes in the SWIG.}, but the pseudo-algorithm should be modified to take into account that the intervention rule now applies to all exposures $a \in \mathbf{A}$.
 
 \subsubsection{Modified Treatment Policies}
 
@@ -344,13 +394,16 @@ One estimator of $\mathbb{E}^G [Y]$ is the \textbf{parametric g-computation form
 Equation \ref{eq:nested_gcom_long_static} suggests a different form for the parametric g-computation formula, which in the literature is usually called iterated conditional expectation (ICE) g-computation formula. The pseudo-algorithm then reads as follows ($\bar{A}_t$ means the history of $A$ up to time $t$):
 
 \begin{enumerate}
-    \item Fit a regression model with dependent variable $Y$ and independent variables $\bar{A}$ and $\bar{L}$.
-    \item 
-    \item Estimate the outcome $Y^a$ using the model fit in the previous point but changing the exposure according to the intervention rule $G$.
-    \item Take the average of $\hat{Y}^a$ over the confounders $L$.
+    \item Fit a regression model with dependent variable $Y$ and independent variables $\bar{A}_1$ and $\bar{L}_1$.
+    \item Estimate the outcome $Y^{\bar{a}_1}$ using the model fit in the previous point but changing the exposure $A_1$ according to the intervention rule $G$.
+    \item Fit a regression model with dependent variable $\hat{Y}^{\bar{a}_1}$ and independent variables $A_0$ and $L_0$.
+    \item Estimate the outcome $Y^{\bar{a}_0}$ using the model fit in the previous point but changing the exposure $A_0$ according to the intervention rule $G$.
+    \item Take the average of $\hat{Y}^{\bar{a}_0}$ over the confounders $L_0$.
 \end{enumerate}
 
-In the case of multiple exposures (e.g., if $A$ is actually a vector of variables), the g-formula would remain the same \footnote{We are assuming that there would be \textbf{no arrow} between exposure nodes in the SWIG, that is: $f(a_1,a_2|l) = f(a_1|l) \times f(a_2|l)$. This means that the correlation between them is due to e.g., a common source, but the exposures themselves are not causally related.}, but the pseudo-algorithm should be modified to take into account that the intervention rule now applies to all exposures $a \in \mathbf{A}$.
+In the case of more than two time points, simply repeat the steps above until reaching $t=0$. The ICE g-computation formula is appealing because it does not require the specification of models for the confounders at each time point.
+
+In the case of multiple exposures (e.g., if $A_t$ is actually a vector of variables), the g-formula would remain the same \footnote{Again, we are assuming that there would be \textbf{no arrow} between exposure nodes at each time point in the SWIG.}, but the pseudo-algorithm should be modified to take into account that the intervention rule now applies to all exposures $a_t \in \mathbf{A_t}$.
 
 \subsubsection{Deterministic Dynamic Treatment Regimes}
 The rule for assigning treatment depends on past treatment or covariates.
