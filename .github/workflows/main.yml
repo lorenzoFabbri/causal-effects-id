@@ -16,6 +16,9 @@ jobs:
       - uses: docker://ghcr.io/michal-h21/make4ht-action:latest
         env:
           command: "make4ht -d out main.tex"
+      - run: |
+          cd out
+          mv main.html index.html
       - uses: actions/upload-artifact@v4.3.3
         with:
           name: main-pdf
