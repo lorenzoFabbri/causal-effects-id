@@ -8,13 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
     steps:
       - uses: actions/checkout@v4.1.7
-        with:
-          submodules: true
-          fetch-depth: 0
       - uses: xu-cheng/latex-action@3.2.0
         with:
           root_file: main.tex
@@ -32,13 +27,7 @@ jobs:
         with:
           tag_name: Current
           files: main.pdf
-      - uses: peaceiris/actions-hugo@v3.0.0
-        with:
-          hugo-version: '0.119.0'
-          extended: true
-      - run: hugo --minify
       - uses: peaceiris/actions-gh-pages@v4.0.0
-        if: github.ref == 'refs/heads/gh-pages'
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
           publish_dir: ./out
