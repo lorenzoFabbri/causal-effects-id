@@ -18,7 +18,7 @@ jobs:
           command: "make4ht -d out main.tex"
       - run: |
           cd out
-          mv main.html index.html
+          sudo mv main.html index.html
       - uses: actions/upload-artifact@v4.3.3
         with:
           name: main-pdf
