@@ -15,7 +15,7 @@ jobs:
           root_file: main.tex
       - uses: docker://ghcr.io/michal-h21/make4ht-action:latest
         env:
-          command: "make4ht -d out main.tex"
+          command: "make4ht -u -f html5+dvisvgm_hashes -d out main.tex"
       - run: |
           cd out
           sudo mv main.html index.html
