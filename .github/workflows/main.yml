@@ -35,6 +35,7 @@ jobs:
       - uses: peaceiris/actions-hugo@v3.0.0
         with:
           hugo-version: '0.119.0'
+          extended: true
       - run: hugo --minify
       - uses: peaceiris/actions-gh-pages@v4.0.0
         if: github.ref == 'refs/heads/gh-pages'
